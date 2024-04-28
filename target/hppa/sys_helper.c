@@ -23,6 +23,8 @@
 #include "exec/helper-proto.h"
 #include "qemu/timer.h"
 #include "sysemu/runstate.h"
+#include "sysemu/sysemu.h"
+#include "chardev/char-fe.h"
 
 void HELPER(write_interval_timer)(CPUHPPAState *env, target_ulong val)
 {
@@ -93,7 +95,7 @@ void HELPER(rfi)(CPUHPPAState *env)
     cpu_hppa_put_psw(env, env->cr[CR_IPSW]);
 }
 
-void HELPER(getshadowregs)(CPUHPPAState *env)
+static void getshadowregs(CPUHPPAState *env)
 {
     env->gr[1] = env->shadow[0];
     env->gr[8] = env->shadow[1];
@@ -106,6 +108,40 @@ void HELPER(getshadowregs)(CPUHPPAState *env)
 
 void HELPER(rfi_r)(CPUHPPAState *env)
 {
-    helper_getshadowregs(env);
+    getshadowregs(env);
     helper_rfi(env);
 }
+
+#ifndef CONFIG_USER_ONLY
+/*
+ * diag_console_output() is a helper function used during the initial bootup
+ * process of the SeaBIOS-hppa firmware.  During the bootup phase, addresses of
+ * serial ports on e.g. PCI busses are unknown and most other devices haven't
+ * been initialized and configured yet.  With help of a simple "diag" assembler
+ * instruction and an ASCII character code in register %r26 firmware can easily
+ * print debug output without any dependencies to the first serial port and use
+ * that as serial console.
+ */
+void HELPER(diag_console_output)(CPUHPPAState *env)
+{
+    CharBackend *serial_backend;
+    Chardev *serial_port;
+    unsigned char c;
+
+    /* find first serial port */
+    serial_port = serial_hd(0);
+    if (!serial_port) {
+        return;
+    }
+
+    /* get serial_backend for the serial port */
+    serial_backend = serial_port->be;
+    if (!serial_backend ||
+        !qemu_chr_fe_backend_connected(serial_backend)) {
+        return;
+    }
+
+    c = (unsigned char)env->gr[26];
+    qemu_chr_fe_write(serial_backend, &c, sizeof(c));
+}
+#endif
