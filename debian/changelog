@@ -141,6 +141,12 @@ qemu (1:8.2.0+ds-2) unstable; urgency=medium
 
  -- Michael Tokarev <mjt@tls.msk.ru>  Tue, 02 Jan 2024 12:10:14 +0300
 
+qemu (1:8.2.0+ds-1deepin1) UNRELEASED; urgency=medium
+
+  * Drop palcode-clipper.
+
+ -- Tianyu Chen <sweetyfish@deepin.org>  Tue, 26 Dec 2023 11:08:03 +0800
+
 qemu (1:8.2.0+ds-1) unstable; urgency=medium
 
   * new upstream release 8.2.0
