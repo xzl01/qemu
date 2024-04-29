@@ -30,13 +30,6 @@ linux_user_ss.add(when: 'CONFIG_ARM_COMPATIBLE_SEMIHOSTING', if_true: files('sem
 
 syscall_nr_generators = {}
 
-gen_vdso_exe = executable('gen-vdso', 'gen-vdso.c',
-                          native: true, build_by_default: false)
-gen_vdso = generator(gen_vdso_exe, output: '@BASENAME@.c.inc',
-                     arguments: ['-o', '@OUTPUT@', '@EXTRA_ARGS@', '@INPUT@'])
-
-subdir('aarch64')
-subdir('alpha')
 subdir('arm')
 subdir('hppa')
 subdir('i386')

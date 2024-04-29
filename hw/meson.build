@@ -46,7 +46,6 @@ subdir('xen')
 subdir('xenpv')
 subdir('fsi')
 
-subdir('alpha')
 subdir('arm')
 subdir('avr')
 subdir('cris')
